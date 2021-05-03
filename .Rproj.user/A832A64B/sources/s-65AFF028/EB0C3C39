@@ -3,9 +3,9 @@
     "path": "~/Documents/Spring 2021/Data Mining/Assignments/Final/main.Rmd",
     "project_path": "main.Rmd",
     "type": "r_markdown",
-    "hash": "0",
+    "hash": "467003249",
     "contents": "",
-    "dirty": true,
+    "dirty": false,
     "created": 1620063700977.0,
     "source_on_save": false,
     "relative_order": 1,
@@ -18,11 +18,11 @@
         "scrollLine": "99"
     },
     "folds": "",
-    "lastKnownWriteTime": 1620073056,
+    "lastKnownWriteTime": 1620073576,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1620073508964,
+    "last_content_update": 1620073576423,
     "read_only": false,
     "read_only_alternatives": []
 }

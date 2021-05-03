@@ -101,7 +101,7 @@ summary(newICU)
 ```{r}
 
 
-pairs(newICU[c('Error-category', 'Date-of-error')])
+pairs.panels(newICU[c('Error-category', 'Date-of-error', 'Contributing-factor')])
 ```
 
 
