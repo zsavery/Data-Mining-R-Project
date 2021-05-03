@@ -1,0 +1,4 @@
+"0","#Mistake; x must be numeric"
+"0","# cor(new_data[c(""Report_number"",""Facility_id"",""Error_category"",""Date_of_error"",""Type_of_error"",""Cause_of_error"")])"
+"0",""
+"0","# cor(new_data[c(""Report_number"",""Facility_id"")])"

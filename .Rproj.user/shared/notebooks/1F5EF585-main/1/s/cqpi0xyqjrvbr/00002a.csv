@@ -1,3 +1,5 @@
 "0","# Factor "
 "0","newICU$`Date-of-error` <- as.Date(newICU$`Date-of-error`, tryFormats = c(""%d-%m-%Y"", ""%d/%m/%y""))"
+"0","#newICU$`Time-of-error` <- as.Date(newICU$`Time-of-error`, tryFormats = c(""%h:%m""))"
+"0","#newICU"
 "0",""
