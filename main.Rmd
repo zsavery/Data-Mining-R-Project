@@ -6,7 +6,7 @@ output: html_notebook
 ```{r}
 if(!require(pacman)) install.packages(pacman)
 library(pacman)
-pacman::p_load(tidyverse, psych, readxl, chron, lubridate)
+pacman::p_load(tidyverse, psych, readxl, RColorBrewer, lubridate, dplyr)
 ```
 
 ```{r}
@@ -14,59 +14,62 @@ pacman::p_load(tidyverse, psych, readxl, chron, lubridate)
 ICUEvents <- read_excel("ICUEvents.xlsx")
 ```
 
-
 ```{r}
 newICU <- ICUEvents
 
 
 ```
 
--	Using R, perform a complete analysis of the dataset (with graphs) representing, for example, 
-  - frequencies of medical errors 
-  - medical errors correlation with 
-    - day of the week
-    - time of the day
-    - staff member who made the error 
--	Since the dependent attribute Type_of_Error has multiple values (levels), select one type of error, you will train your classifier 
--	Check that the error  is sufficiently represented in the dataset.
--	Clean and prepare your data, using the methods seen in class
--	Train your classifier.
--	Write a report documenting your work: Dataset description, machine learning method and why it is suitable, Training and testing datasets, and the model evaluation.
+-   Using R, perform a complete analysis of the dataset (with graphs) representing, for example,
+
+-   frequencies of medical errors
+
+-   medical errors correlation with
+
+    -   day of the week
+    -   time of the day
+    -   staff member who made the error
+
+-   Since the dependent attribute Type_of_Error has multiple values (levels), select one type of error, you will train your classifier
+
+-   Check that the error is sufficiently represented in the dataset.
+
+-   Clean and prepare your data, using the methods seen in class
+
+-   Train your classifier.
+
+-   Write a report documenting your work: Dataset description, machine learning method and why it is suitable, Training and testing datasets, and the model evaluation.
 
 ```{r}
 # Lets you view document
 # view(newICU)
 ```
 
-
 ```{r}
 # Remove useless column
 newICU <- subset(newICU, select= -...11)
 ```
-
 
 ```{r}
 #Summarizes doc
 summary(newICU)
 ```
 
-
 ```{r}
 #Gives you the data types of features
 str(newICU)
 ```
-
 
 ```{r}
 #Displays doc
 newICU
 ```
 
-
 ```{r}
 #Gives you names of features
 names(newICU)
 ```
+
 ```{r}
 # Factor 
 newICU$`Date-of-error` <- as.Date(newICU$`Date-of-error`, tryFormats = c("%d-%m-%Y", "%d/%m/%y"))
@@ -75,17 +78,14 @@ newICU$`Date-of-error` <- as.Date(newICU$`Date-of-error`, tryFormats = c("%d-%m-
 
 ```
 
-
 ```{r}
 newICU$`Error-category` <- factor(newICU$`Error-category`)
 ```
-
 
 ```{r}
 newICU$`Type-of-error` <- factor(newICU$`Type-of-error`)
 newICU$`Cause-of-error` <- factor(newICU$`Cause-of-error`)
 ```
-
 
 ```{r}
 newICU$`Contributing-factor` <- factor(newICU$`Contributing-factor`)
@@ -102,40 +102,57 @@ summary(newICU)
 ```
 
 ```{r}
+ggplot(data = newICU, mapping = aes(`Error-category`)) + 
+  geom_bar() + 
+  scale_fill_brewer(palette="Dark2")
+```
+
+```{r}
+count_error_category <- newICU %>%
+  count(`Error-category`)
+?palette
+
+```
+
+```{r}
+ggplot(count_error_category, aes(x = `Error-category`, y = n)) +
+         geom_bar(stat = 'identity') + geom_text(aes(label = n, vjust = -.45) )
+  
+```
+
+```{r}
 
 
 pairs.panels(newICU[c('Error-category', 'Date-of-error', 'Contributing-factor', 'Medication-process-node', 'Location-of-error', 'Type-of-error', 'Staff-type-perpetuated-error', 'Staff-type-discovered-error')])
 ```
 
+```{r}
+Improper dose/quantity
+```
 
 ```{r}
 #How large is the dataset
 dim(newICU)
 ```
 
-
 ```{r}
 #Number of attributes
 nrow(newICU) * ncol(newICU)
 ```
-
 
 ```{r}
 # First ten rows
 head(newICU)
 ```
 
-
 ```{r}
 # Column Names
 colnames(newICU)
 ```
 
-
 ```{r}
 new_data <- subset(newICU, select = c("Report-number", "Facility-ID","Error-category","Date-of-error", "Time-of-error","Day-of-week","Type-of-error","Cause-of-error", "Contributing-factor","Location-of-error", "Description-of-error", "Medication-process-node","Staff-type-initiated-error","Staff-type-perpetuated-error", "Staff-type-discovered-error","Action-taken","Action-taken-detail","Date-record-was-entered"))
 ```
-
 
 ```{r}
 colnames(new_data)[colnames(new_data) %in% c("Report-Number", "Facility-ID", "Error-Category",                                           "Date-of-error","Time-of-error", "Day-of-week", "Type-of-error", "Cause-of-error", "Contributing-factor","Location-of-error","Description-of-error", "Medication-process-node","Staff-type-initiated-error","Staff-type-perpetuated-error", "Staff-type-discovered-error","Action-taken","Action-taken-detail","Date-record-was-entered")] <-
@@ -144,7 +161,6 @@ colnames(new_data)[colnames(new_data) %in% c("Report-Number", "Facility-ID", "Er
     "Staff_type_perpetuated_error","Staff_type_discovered_error","Action_taken","Action_taken_detail","Date_record_was_entered")
 ```
 
-
 ```{r}
 #Mistake; x must be numeric
 # cor(new_data[c("Report_number","Facility_id","Error_category","Date_of_error","Type_of_error","Cause_of_error")])
@@ -152,22 +168,18 @@ colnames(new_data)[colnames(new_data) %in% c("Report-Number", "Facility-ID", "Er
 # cor(new_data[c("Report_number","Facility_id")])
 ```
 
-
 ```{r}
 #data_num <- as.data.frame(apply(new_data, 2, as.numeric))
 #sapply(data_num, class)
 ```
 
-
 ```{r}
 cor(data_num[c("Report_number","Facility_id")])
 ```
 
-
 ```{r}
 cor(data_num[c("Report_number","Facility_id","Error_category","Date_of_error","Type_of_error","Cause_of_error", 'Staff-type-initiated-error')])
 ```
-
 
 ```{r}
 ggplot(data=data_num)
@@ -186,4 +198,3 @@ ggplot(data = data_num, mapping = aes(x = Date_of_error, y= Type_of_error))
 
 
 ```
-

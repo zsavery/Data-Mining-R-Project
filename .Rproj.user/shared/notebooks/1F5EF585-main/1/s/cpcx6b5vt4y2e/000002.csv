@@ -1,2 +1,0 @@
-"0","#data_num <- as.data.frame(apply(new_data, 2, as.numeric))"
-"0","#sapply(data_num, class)"

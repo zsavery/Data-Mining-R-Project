@@ -1,2 +1,0 @@
-"0","# Remove useless column"
-"0","newICU <- subset(newICU, select= -...11)"
