@@ -123,78 +123,30 @@ ggplot(count_error_category, aes(x = `Error-category`, y = n)) +
 ```{r}
 
 
-pairs.panels(newICU[c('Error-category', 'Date-of-error', 'Contributing-factor', 'Medication-process-node', 'Location-of-error', 'Type-of-error', 'Staff-type-perpetuated-error', 'Staff-type-discovered-error')])
+pairs.panels(newICU[c('Error-category', 'Date-of-error', 'Contributing-factor', 'Medication-process-node', 'Location-of-error', 'Type-of-error', 'Staff-type-initiated-error', 'Staff-type-perpetuated-error', 'Staff-type-discovered-error')])
 ```
 
 ```{r}
-Improper dose/quantity
+Improper_doseICU <- subset(newICU, `Type-of-error` =='Improper dose/quantity')
+Improper_doseICU <- subset(Improper_doseICU, select= c(`Error-category`,  `Date-of-error`, `Contributing-factor`, `Medication-process-node`, `Location-of-error`, `Staff-type-initiated-error`, `Staff-type-perpetuated-error`, `Staff-type-discovered-error`))
+```
+
+
+```{r}
+pairs.panels(Improper_doseICU[c('Error-category', 'Date-of-error', 'Contributing-factor', 'Medication-process-node', 'Location-of-error', 'Staff-type-initiated-error')])
+
+```
+```{r}
+fit_Improper_dose <- lm(`Error-category` ~ `Date-of-error` + `Contributing-factor` + `Medication-process-node` + `Location-of-error` + `Staff-type-initiated-error` + `Staff-type-perpetuated-error` + `Staff-type-discovered-error`, data= Improper_doseICU)
 ```
 
 ```{r}
-#How large is the dataset
-dim(newICU)
+fit_Improper_dose
 ```
 
 ```{r}
-#Number of attributes
-nrow(newICU) * ncol(newICU)
-```
 
-```{r}
-# First ten rows
-head(newICU)
-```
-
-```{r}
-# Column Names
-colnames(newICU)
-```
-
-```{r}
-new_data <- subset(newICU, select = c("Report-number", "Facility-ID","Error-category","Date-of-error", "Time-of-error","Day-of-week","Type-of-error","Cause-of-error", "Contributing-factor","Location-of-error", "Description-of-error", "Medication-process-node","Staff-type-initiated-error","Staff-type-perpetuated-error", "Staff-type-discovered-error","Action-taken","Action-taken-detail","Date-record-was-entered"))
-```
-
-```{r}
-colnames(new_data)[colnames(new_data) %in% c("Report-Number", "Facility-ID", "Error-Category",                                           "Date-of-error","Time-of-error", "Day-of-week", "Type-of-error", "Cause-of-error", "Contributing-factor","Location-of-error","Description-of-error", "Medication-process-node","Staff-type-initiated-error","Staff-type-perpetuated-error", "Staff-type-discovered-error","Action-taken","Action-taken-detail","Date-record-was-entered")] <-
-  c("Report_number","Facility_id","Error_category","Date_of_error","Time_of_error","Day_of_week","Type_of_error","Cause_of_error",
-    "Contributing_factor","Location_of_error","11","Description_of_error","Medication_process_node","Staff_type_initiated_error",
-    "Staff_type_perpetuated_error","Staff_type_discovered_error","Action_taken","Action_taken_detail","Date_record_was_entered")
-```
-
-```{r}
-#Mistake; x must be numeric
-# cor(new_data[c("Report_number","Facility_id","Error_category","Date_of_error","Type_of_error","Cause_of_error")])
-
-# cor(new_data[c("Report_number","Facility_id")])
-```
-
-```{r}
-#data_num <- as.data.frame(apply(new_data, 2, as.numeric))
-#sapply(data_num, class)
-```
-
-```{r}
-cor(data_num[c("Report_number","Facility_id")])
-```
-
-```{r}
-cor(data_num[c("Report_number","Facility_id","Error_category","Date_of_error","Type_of_error","Cause_of_error", 'Staff-type-initiated-error')])
-```
-
-```{r}
-ggplot(data=data_num)
-plot(Date_of_error ~ Type_of_error, data = data_num, pch=16)
-
-pairs(data_num)
-
-
-library(tidyverse)
-ggplot(data = data_num, mapping = aes(x = Date_of_error, y= Type_of_error))
-
-
-
-
-
-
+predict_Improper_dose <- predict(fit_Improper_dose, Improper_doseICU)
 
 ```
+
