@@ -1,0 +1,7 @@
+"0","newICU$`Contributing-factor` <- factor(newICU$`Contributing-factor`)"
+"0","newICU$`Medication-process-node` <- factor(newICU$`Medication-process-node`)"
+"0","newICU$`Staff-type-initiated-error` <- factor(newICU$`Staff-type-initiated-error`)"
+"0","newICU$`Staff-type-perpetuated-error` <- factor(newICU$`Staff-type-perpetuated-error`)"
+"0","newICU$`Action-taken` <- factor(newICU$`Action-taken`)"
+"0","newICU$`Staff-type-discovered-error` <- factor(newICU$`Staff-type-discovered-error`)"
+"0",""
