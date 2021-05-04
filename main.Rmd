@@ -1,6 +1,8 @@
 ---
-title: "Project 2: Building a Safer Health System"
-output: html_notebook
+title: 'Project 2: Building a Safer Health System'
+output:
+  word_document: default
+  html_notebook: default
 ---
 
 ```{r}
@@ -139,14 +141,33 @@ pairs.panels(Improper_doseICU[c('Error-category', 'Date-of-error', 'Contributing
 ```{r}
 fit_Improper_dose <- lm(`Error-category` ~ `Date-of-error` + `Contributing-factor` + `Medication-process-node` + `Location-of-error` + `Staff-type-initiated-error` + `Staff-type-perpetuated-error` + `Staff-type-discovered-error`, data= Improper_doseICU)
 ```
+```{r}
+fit_Improper_dose2 <- lm(`Error-category` ~ `Location-of-error` + `Staff-type-initiated-error` + `Staff-type-perpetuated-error` + `Staff-type-discovered-error`, data= Improper_doseICU)
+```
 
 ```{r}
 fit_Improper_dose
 ```
+```{r}
+fit_Improper_dose2
+```
+```{r}
+Improper_doseICU$`Staff-type-initiated-error` <- as.factor(Improper_doseICU$`Staff-type-initiated-error`)
+
+count_2 <- Improper_doseICU %>%
+  count(`Staff-type-initiated-error`)
+frequency(Improper_doseICU$`Staff-type-initiated-error`)
+```
 
 ```{r}
 
-predict_Improper_dose <- predict(fit_Improper_dose, Improper_doseICU)
+# predict_Improper_dose <- predict(fit_Improper_dose, Improper_doseICU)
 
+```
+
+```{r}
+# x <- Improper_doseICU[c('Error-category', 'Location-of-error', 'Staff-type-initiated-error', 'Staff-type-perpetuated-error', 'Staff-type-discovered-error')]
+# 
+# predict_Improper_dose2 <- predict(fit_Improper_dose2, x)
 ```
 
