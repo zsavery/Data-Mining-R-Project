@@ -15,12 +15,16 @@ pacman::p_load(tidyverse, psych, readxl, RColorBrewer, lubridate, dplyr)
 #Plugs file into variable
 ICUEvents <- read_excel("ICUEvents.xlsx")
 ```
+```{r}
+names(ICUEvents)
+```
 
 ```{r}
 newICU <- ICUEvents
-
+newICU <- newICU[complete.cases(newICU["Day-of-week"]), ]
 
 ```
+
 
 -   Using R, perform a complete analysis of the dataset (with graphs) representing, for example,
 
@@ -68,15 +72,11 @@ newICU
 ```
 
 ```{r}
-#Gives you names of features
-names(newICU)
-```
-
-```{r}
 # Factor 
 newICU$`Date-of-error` <- as.Date(newICU$`Date-of-error`, tryFormats = c("%d-%m-%Y", "%d/%m/%y"))
 #newICU$`Time-of-error` <- as.Date(newICU$`Time-of-error`, tryFormats = c("%h:%m"))
 #newICU
+#newICU$`Staff-type-initiated-error`[newICU$`Staff-type-initiated-error`.con]
 
 ```
 
@@ -96,23 +96,27 @@ newICU$`Staff-type-initiated-error` <- factor(newICU$`Staff-type-initiated-error
 newICU$`Staff-type-perpetuated-error` <- factor(newICU$`Staff-type-perpetuated-error`)
 newICU$`Action-taken` <- factor(newICU$`Action-taken`)
 newICU$`Staff-type-discovered-error` <- factor(newICU$`Staff-type-discovered-error`)
-
+newICU$`Day-of-week` <- factor(newICU$`Day-of-week`)
 ```
 
 ```{r}
 summary(newICU)
 ```
+```{r}
+#newICU$`Cause-of-error`
+```
 
 ```{r}
-ggplot(data = newICU, mapping = aes(`Error-category`)) + 
-  geom_bar() + 
-  scale_fill_brewer(palette="Dark2")
+count_day_week <- newICU %>%
+  count(`Day-of-week`)
+
+ggplot(count_day_week, aes(x = `Day-of-week`, y = n)) +
+         geom_bar(stat = 'identity') + geom_text(aes(label = n, vjust = -.45) )
 ```
 
 ```{r}
 count_error_category <- newICU %>%
   count(`Error-category`)
-?palette
 
 ```
 
@@ -123,51 +127,53 @@ ggplot(count_error_category, aes(x = `Error-category`, y = n)) +
 ```
 
 ```{r}
-
-
-pairs.panels(newICU[c('Error-category', 'Date-of-error', 'Contributing-factor', 'Medication-process-node', 'Location-of-error', 'Type-of-error', 'Staff-type-initiated-error', 'Staff-type-perpetuated-error', 'Staff-type-discovered-error')])
+pairs.panels(newICU[c('Type-of-error','Error-category', 'Day-of-week', 'Contributing-factor', 'Medication-process-node', 'Location-of-error', 'Type-of-error')])
 ```
 
 ```{r}
 Improper_doseICU <- subset(newICU, `Type-of-error` =='Improper dose/quantity')
-Improper_doseICU <- subset(Improper_doseICU, select= c(`Error-category`,  `Date-of-error`, `Contributing-factor`, `Medication-process-node`, `Location-of-error`, `Staff-type-initiated-error`, `Staff-type-perpetuated-error`, `Staff-type-discovered-error`))
+Improper_doseICU <- subset(Improper_doseICU, select= c(`Type-of-error`, `Error-category`,   `Day-of-week`, `Contributing-factor`, `Medication-process-node`, `Location-of-error`))
 ```
 
 
 ```{r}
-pairs.panels(Improper_doseICU[c('Error-category', 'Date-of-error', 'Contributing-factor', 'Medication-process-node', 'Location-of-error', 'Staff-type-initiated-error')])
-
-```
-```{r}
-fit_Improper_dose <- lm(`Error-category` ~ `Date-of-error` + `Contributing-factor` + `Medication-process-node` + `Location-of-error` + `Staff-type-initiated-error` + `Staff-type-perpetuated-error` + `Staff-type-discovered-error`, data= Improper_doseICU)
-```
-```{r}
-fit_Improper_dose2 <- lm(`Error-category` ~ `Location-of-error` + `Staff-type-initiated-error` + `Staff-type-perpetuated-error` + `Staff-type-discovered-error`, data= Improper_doseICU)
-```
-
-```{r}
-fit_Improper_dose
-```
-```{r}
-fit_Improper_dose2
-```
-```{r}
-Improper_doseICU$`Staff-type-initiated-error` <- as.factor(Improper_doseICU$`Staff-type-initiated-error`)
-
-count_2 <- Improper_doseICU %>%
-  count(`Staff-type-initiated-error`)
-frequency(Improper_doseICU$`Staff-type-initiated-error`)
-```
-
-```{r}
-
-# predict_Improper_dose <- predict(fit_Improper_dose, Improper_doseICU)
+pairs.panels(Improper_doseICU[c('Error-category', 'Day-of-week', 'Contributing-factor', 'Medication-process-node', 'Location-of-error')])
 
 ```
 
 ```{r}
-# x <- Improper_doseICU[c('Error-category', 'Location-of-error', 'Staff-type-initiated-error', 'Staff-type-perpetuated-error', 'Staff-type-discovered-error')]
-# 
-# predict_Improper_dose2 <- predict(fit_Improper_dose2, x)
+set.seed(1000)
+Improper_doseICU$`Day-of-week` <- as.factor(Improper_doseICU$`Day-of-week`)
+
+test.size <- round(nrow(Improper_doseICU) * .3)
+train.size <- round(nrow(Improper_doseICU) * .7)
 ```
 
+
+```{r}
+train.df <- Improper_doseICU[1:train.size,]
+test.df <- Improper_doseICU[(train.size+1):(train.size+test.size),]
+```
+#### 9. Download the `rpart` for “Recursive Partitioning and Regression Trees” if it is not in your R base and bring it in your environment.
+```{r}
+pacman::p_load(rpart)
+```
+
+```{r}
+
+#fit <- rpart(`Medication-process-node`  `Day-of-week` + `Error-category`,  data=train.df, method="class") 
+fit <- rpart( `Location-of-error` ~ `Medication-process-node`  + `Day-of-week`, data=train.df, method="class") 
+fit
+```
+
+```{r}
+pacman::p_load(rattle, rpart.plot, RColorBrewer)
+
+```
+
+```{r}
+fancyRpartPlot(fit)
+```
+```{r}
+
+```

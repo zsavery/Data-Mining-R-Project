@@ -1,5 +1,0 @@
-"0","#Plugs file into variable"
-"0","ICUEvents <- read_excel(""ICUEvents.xlsx"")"
-"2","New names:
-* `` -> ...11
-"
