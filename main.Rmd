@@ -1,113 +1,88 @@
 ---
 title: 'Project 2: Building a Safer Health System'
 output:
-  word_document: default
+  pdf_document: default
   html_notebook: default
+  word_document: default
 ---
 
 ```{r}
 if(!require(pacman)) install.packages(pacman)
 library(pacman)
-pacman::p_load(tidyverse, psych, readxl, RColorBrewer, lubridate, dplyr)
+pacman::p_load(tidyverse, psych, readxl, dplyr, rpart, rattle)
 ```
 
 ```{r}
 #Plugs file into variable
 ICUEvents <- read_excel("ICUEvents.xlsx")
 ```
+
 ```{r}
 names(ICUEvents)
 ```
 
 ```{r}
-newICU <- ICUEvents
-newICU <- newICU[complete.cases(newICU["Day-of-week"]), ]
-
-```
-
-
--   Using R, perform a complete analysis of the dataset (with graphs) representing, for example,
-
--   frequencies of medical errors
-
--   medical errors correlation with
-
-    -   day of the week
-    -   time of the day
-    -   staff member who made the error
-
--   Since the dependent attribute Type_of_Error has multiple values (levels), select one type of error, you will train your classifier
-
--   Check that the error is sufficiently represented in the dataset.
-
--   Clean and prepare your data, using the methods seen in class
-
--   Train your classifier.
-
--   Write a report documenting your work: Dataset description, machine learning method and why it is suitable, Training and testing datasets, and the model evaluation.
-
-```{r}
-# Lets you view document
-# view(newICU)
+newICU1 <- ICUEvents
+newICU1 <- newICU1[complete.cases(newICU1["Type-of-error"]), ]
 ```
 
 ```{r}
 # Remove useless column
-newICU <- subset(newICU, select= -...11)
+newICU1 <- subset(newICU1, select= -...11)
+newICU2 <- ICUEvents
+
+```
+
+
+```{r}
+# Lets you view document
+view(newICU1)
 ```
 
 ```{r}
 #Summarizes doc
-summary(newICU)
+summary(newICU1)
 ```
 
 ```{r}
 #Gives you the data types of features
-str(newICU)
-```
-
-```{r}
-#Displays doc
-newICU
+str(newICU1)
 ```
 
 ```{r}
 # Factor 
-newICU$`Date-of-error` <- as.Date(newICU$`Date-of-error`, tryFormats = c("%d-%m-%Y", "%d/%m/%y"))
-#newICU$`Time-of-error` <- as.Date(newICU$`Time-of-error`, tryFormats = c("%h:%m"))
-#newICU
-#newICU$`Staff-type-initiated-error`[newICU$`Staff-type-initiated-error`.con]
+newICU1$`Date-of-error` <- as.Date(newICU1$`Date-of-error`, tryFormats = c("%d-%m-%Y", "%d/%m/%y"))
+#newICU1$`Time-of-error` <- as.Date(newICU1$`Time-of-error`, tryFormats = c("%h:%m"))
+#newICU1
+#newICU1$`Staff-type-initiated-error`[newICU1$`Staff-type-initiated-error`.con]
 
 ```
 
 ```{r}
-newICU$`Error-category` <- factor(newICU$`Error-category`)
+newICU1$`Error-category` <- factor(newICU1$`Error-category`)
 ```
 
 ```{r}
-newICU$`Type-of-error` <- factor(newICU$`Type-of-error`)
-newICU$`Cause-of-error` <- factor(newICU$`Cause-of-error`)
+newICU1$`Type-of-error` <- factor(newICU1$`Type-of-error`)
+newICU1$`Cause-of-error` <- factor(newICU1$`Cause-of-error`)
 ```
 
 ```{r}
-newICU$`Contributing-factor` <- factor(newICU$`Contributing-factor`)
-newICU$`Medication-process-node` <- factor(newICU$`Medication-process-node`)
-newICU$`Staff-type-initiated-error` <- factor(newICU$`Staff-type-initiated-error`)
-newICU$`Staff-type-perpetuated-error` <- factor(newICU$`Staff-type-perpetuated-error`)
-newICU$`Action-taken` <- factor(newICU$`Action-taken`)
-newICU$`Staff-type-discovered-error` <- factor(newICU$`Staff-type-discovered-error`)
-newICU$`Day-of-week` <- factor(newICU$`Day-of-week`)
+newICU1$`Contributing-factor` <- factor(newICU1$`Contributing-factor`)
+newICU1$`Medication-process-node` <- factor(newICU1$`Medication-process-node`)
+newICU1$`Staff-type-initiated-error` <- factor(newICU1$`Staff-type-initiated-error`)
+newICU1$`Staff-type-perpetuated-error` <- factor(newICU1$`Staff-type-perpetuated-error`)
+newICU1$`Action-taken` <- factor(newICU1$`Action-taken`)
+newICU1$`Staff-type-discovered-error` <- factor(newICU1$`Staff-type-discovered-error`)
+newICU1$`Day-of-week` <- factor(newICU1$`Day-of-week`)
 ```
 
 ```{r}
-summary(newICU)
-```
-```{r}
-#newICU$`Cause-of-error`
+summary(newICU1)
 ```
 
 ```{r}
-count_day_week <- newICU %>%
+count_day_week <- newICU1 %>%
   count(`Day-of-week`)
 
 ggplot(count_day_week, aes(x = `Day-of-week`, y = n)) +
@@ -115,7 +90,7 @@ ggplot(count_day_week, aes(x = `Day-of-week`, y = n)) +
 ```
 
 ```{r}
-count_error_category <- newICU %>%
+count_error_category <- newICU1 %>%
   count(`Error-category`)
 
 ```
@@ -126,54 +101,213 @@ ggplot(count_error_category, aes(x = `Error-category`, y = n)) +
   
 ```
 
-```{r}
-pairs.panels(newICU[c('Type-of-error','Error-category', 'Day-of-week', 'Contributing-factor', 'Medication-process-node', 'Location-of-error', 'Type-of-error')])
-```
 
 ```{r}
-Improper_doseICU <- subset(newICU, `Type-of-error` =='Improper dose/quantity')
-Improper_doseICU <- subset(Improper_doseICU, select= c(`Type-of-error`, `Error-category`,   `Day-of-week`, `Contributing-factor`, `Medication-process-node`, `Location-of-error`))
-```
-
-
-```{r}
-pairs.panels(Improper_doseICU[c('Error-category', 'Day-of-week', 'Contributing-factor', 'Medication-process-node', 'Location-of-error')])
-
+Improper_doseICU1 <- subset(newICU1, `Type-of-error` =='Improper dose/quantity')
+Improper_doseICU1 <- subset(Improper_doseICU1, select= c(`Type-of-error`, `Error-category`,   `Day-of-week`, `Contributing-factor`, `Medication-process-node`, `Location-of-error`))
 ```
 
 ```{r}
 set.seed(1000)
-Improper_doseICU$`Day-of-week` <- as.factor(Improper_doseICU$`Day-of-week`)
-
-test.size <- round(nrow(Improper_doseICU) * .3)
-train.size <- round(nrow(Improper_doseICU) * .7)
-```
-
-
-```{r}
-train.df <- Improper_doseICU[1:train.size,]
-test.df <- Improper_doseICU[(train.size+1):(train.size+test.size),]
-```
-#### 9. Download the `rpart` for “Recursive Partitioning and Regression Trees” if it is not in your R base and bring it in your environment.
-```{r}
-pacman::p_load(rpart)
+Improper_doseICU1$`Day-of-week` <- as.factor(Improper_doseICU1$`Day-of-week`)
 ```
 
 ```{r}
+fit <- rpart( `Medication-process-node` ~  `Day-of-week` + `Location-of-error`, data=Improper_doseICU1, method="class") 
 
-#fit <- rpart(`Medication-process-node`  `Day-of-week` + `Error-category`,  data=train.df, method="class") 
-fit <- rpart( `Location-of-error` ~ `Medication-process-node`  + `Day-of-week`, data=train.df, method="class") 
-fit
-```
-
-```{r}
-pacman::p_load(rattle, rpart.plot, RColorBrewer)
-
-```
-
-```{r}
 fancyRpartPlot(fit)
 ```
 ```{r}
+pacman::p_load(tm, wordcloud, e1071, gmodels)
+```
+
+```{r}
+ICU_data <- subset(newICU2, select= c(`Type-of-error`, `Description-of-error`))
+ICU_data$isImproperDose <- ICU_data$`Type-of-error`
+ICU_data$`Type-of-error` <- factor(ICU_data$`Type-of-error`)
+```
+
+```{r}
+
+ICU_data <- mutate(ICU_data, isImproperDose = ifelse(as.character(isImproperDose) != "Improper dose/quantity", "Other", as.character(isImproperDose)))
+
+ICU_data <- subset (ICU_data, select = -`Type-of-error`)
+```
+
+### Factor
+```{r}
+ICU_data$isImproperDose <- factor(ICU_data$isImproperDose)
+```
+### Frequency
+```{r}
+table(ICU_data$isImproperDose)
+```
+
+
+```{r}
+
+prop.table(table(ICU_data$isImproperDose))
 
 ```
+## Corpus
+```{r}
+corpus <- Corpus(VectorSource(ICU_data$`Description-of-error`))
+# str(corpus)
+```
+
+```{r}
+corpus[1:10] %>%
+  inspect()
+```
+
+### Clean
+#### Set to Lower Case
+```{r}
+clean_corpus <- tm_map(corpus, tolower)
+clean_corpus[1:10] %>%
+  inspect()
+```
+#### Remove Numbers
+```{r}
+clean_corpus1 <- clean_corpus %>%
+  tm_map(removeNumbers)
+
+clean_corpus1[1:10] %>%
+  inspect()
+```
+#### Remove Stop Words
+```{r}
+clean_corpus2 <- tm_map(clean_corpus1, removeWords, stopwords())
+clean_corpus2[1:10] %>%
+  inspect()
+```
+#### Remove Punctuation
+```{r}
+clean_corpus3 <- tm_map(clean_corpus2, removePunctuation)
+clean_corpus3[1:10] %>%
+  inspect()
+```
+#### Remove White Space
+```{r}
+clean_corpus4 <- tm_map(clean_corpus3, stripWhitespace)
+clean_corpus4[1:10] %>%
+  inspect()
+```
+### Document Term Matrix from tm package
+```{r}
+dmt <- DocumentTermMatrix(clean_corpus4)
+dmt
+# View(dmt)
+```
+## Creating Training and Test Datasets
+### Splitting the Data Frame
+```{r}
+ICU_data.max_size <- nrow(ICU_data)
+ICU_data$isImproperDose <- factor(ICU_data$isImproperDose)
+test.size <- round(ICU_data.max_size * .3)
+train.size <- round(ICU_data.max_size * .7)
+train.df <- ICU_data[1:train.size,]
+test.df <- ICU_data[(train.size+1):ICU_data.max_size,]
+
+```
+
+```{r}
+clean_corpus.max_size <- length(clean_corpus4)
+clean_corpus_test.size <- round(clean_corpus.max_size * .3)
+clean_corpus_train.size <- round(clean_corpus.max_size * .7)
+clean_corpus_train.df <- clean_corpus4[1:clean_corpus_train.size ]
+clean_corpus_test.df <- clean_corpus4[(clean_corpus_train.size +1):clean_corpus.max_size]
+```
+
+### Splitting the Document Term Matrix
+```{r}
+dmt.max_size <- length(dmt)
+dmt_test.size <- round(dmt.max_size * .3)
+dmt_train.size <- round(dmt.max_size * .7)
+dmt_train <- dmt[1:dmt_train.size,]
+dmt_test <- dmt[(dmt_train.size+1):dmt.max_size,]
+```
+
+### Compare Frequencies
+```{r}
+prop.table(table(ICU_data$isImproperDose))
+```
+
+```{r}
+prop.table(table(train.df$isImproperDose))
+```
+
+```{r}
+prop.table(table(test.df$isImproperDose))
+```
+
+### Subset
+#### Subset Improper dose/quantity
+```{r}
+Improper <- subset(train.df, isImproperDose=="Improper dose/quantity")
+```
+
+#### Subset Other
+```{r}
+Other <- subset(train.df, isImproperDose=="Other")
+```
+## Find Frequent Terms
+### Words That Have a Frequency of 5 or More
+```{r}
+Dict <- findFreqTerms(dmt_train, 1)
+Dict
+```
+
+
+```{r}
+matrix_train <- DocumentTermMatrix(clean_corpus_train.df, list(dictionary=Dict))
+```
+
+```{r}
+matrix_test <- DocumentTermMatrix(clean_corpus_test.df, list(dictionary=Dict))
+```
+
+```{r}
+convert_counts <- function(x) {
+  x <- ifelse(x > 0, 1, 0) 
+  x <- factor(x, levels = c(0,1),
+              label= c("Yes","No"))
+  return(x)
+}
+```
+
+### Apply convert_counts
+```{r}
+convert_train1 <- apply(matrix_train, MARGIN = 2, convert_counts)
+convert_test1 <-apply(matrix_test, MARGIN = 2, convert_counts)
+```
+
+#### Check data using str
+```{r}
+str(convert_train1)
+```
+
+```{r}
+str(convert_test1)
+```
+## Building the Classifier
+```{r}
+classifier <- naiveBayes(convert_train1, train.df$isImproperDose)
+
+```
+## Making Predictions
+```{r}
+test_predict <- predict(classifier, convert_test1)
+```
+## Crosstables
+```{r}
+cross_table <- CrossTable(test_predict, 
+           test.df$isImproperDose,
+           prop.chisq = TRUE, 
+           prop.t = TRUE, 
+           prop.c = TRUE, 
+           prop.r = TRUE, 
+           dnn = c('predicted', 'actual'))
+```
+
+
